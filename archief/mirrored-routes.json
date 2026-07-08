@@ -1,0 +1,62 @@
+[
+    {
+        "Url":  "https://le-network.nl/",
+        "Out":  "index.html",
+        "Type":  "page"
+    },
+    {
+        "Url":  "https://le-network.nl/le-network/",
+        "Out":  "le-network/index.html",
+        "Type":  "page"
+    },
+    {
+        "Url":  "https://le-network.nl/over-ons/",
+        "Out":  "over-ons/index.html",
+        "Type":  "page"
+    },
+    {
+        "Url":  "https://le-network.nl/referenties/",
+        "Out":  "referenties/index.html",
+        "Type":  "page"
+    },
+    {
+        "Url":  "https://le-network.nl/elementor-10378/",
+        "Out":  "elementor-10378/index.html",
+        "Type":  "page"
+    },
+    {
+        "Url":  "https://le-network.nl/references/",
+        "Out":  "references/index.html",
+        "Type":  "page"
+    },
+    {
+        "Url":  "https://le-network.nl/le-network-products-renamed-to-learn-games/",
+        "Out":  "le-network-products-renamed-to-learn-games/index.html",
+        "Type":  "post"
+    },
+    {
+        "Url":  "https://le-network.nl/working-with-the-niet-school-initiative/",
+        "Out":  "working-with-the-niet-school-initiative/index.html",
+        "Type":  "post"
+    },
+    {
+        "Url":  "https://le-network.nl/new-leadership-for-le-network/",
+        "Out":  "new-leadership-for-le-network/index.html",
+        "Type":  "post"
+    },
+    {
+        "Url":  "https://le-network.nl/re-xplore-and-le-network-joining-forces/",
+        "Out":  "re-xplore-and-le-network-joining-forces/index.html",
+        "Type":  "post"
+    },
+    {
+        "Url":  "https://le-network.nl/relocation-of-the-le-network-office/",
+        "Out":  "relocation-of-the-le-network-office/index.html",
+        "Type":  "post"
+    },
+    {
+        "Url":  "https://le-network.nl/cum-laude-oksana/",
+        "Out":  "cum-laude-oksana/index.html",
+        "Type":  "post"
+    }
+]

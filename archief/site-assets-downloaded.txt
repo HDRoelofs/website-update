@@ -1,0 +1,13 @@
+site-includes/blocks/paragraph/style.min.css
+assets/themes/customify/build/fonts/font-awesome/css/font-awesome.min.css
+assets/themes/customify/build/css/frontend/style-theme.min.css
+assets/themes/customify/build/images/default-cover.jpg
+assets/themes/customify/build/js/frontend/theme.min.js
+site-includes/js/emoji-release.min.js
+site-includes/js/emoji-loader.min.js
+site-includes/blocks/image/style.min.css
+site-includes/js/dist/script-modules/block-library/image/view.min.js
+site-includes/blocks/cover/style.min.css
+site-includes/blocks/heading/style.min.css
+site-includes/blocks/columns/style.min.css
+site-includes/blocks/separator/style.min.css
