@@ -90,6 +90,17 @@ function enhanceContactBlocks(html: string) {
   );
 }
 
+function enhanceContactAnchor(html: string) {
+  if (html.includes('id="contact"')) {
+    return html;
+  }
+
+  return html.replace(
+    /<form(?![^>]*\sid=)([^>]*class="static-contact-form")/,
+    '<form id="contact"$1'
+  );
+}
+
 function enhanceImageRuns(html: string) {
   const imageRunPattern = /(<img[^>]+>)\s*<br\/?>\s*(<img[^>]+>)\s*<br\/?>\s*(<img[^>]+>)/g;
 
@@ -168,7 +179,7 @@ function localizeMigratedFragments(html: string) {
   );
 }
 
-const content = enhanceImageRuns(enhanceContactBlocks(enhanceReferenceLogos(enhanceTeamPage(removeDuplicateFirstHeading(localizeMigratedFragments(page.content))))));
+const content = enhanceImageRuns(enhanceContactAnchor(enhanceContactBlocks(enhanceReferenceLogos(enhanceTeamPage(removeDuplicateFirstHeading(localizeMigratedFragments(page.content)))))));
 ---
 
 <BaseLayout title={`${displayTitle} | LE-Network`} description={metaDescription} lang={currentLang}>
@@ -235,6 +246,10 @@ const content = enhanceImageRuns(enhanceContactBlocks(enhanceReferenceLogos(enha
     font-weight: 650;
     text-decoration-thickness: 0.08em;
     text-underline-offset: 0.18em;
+  }
+
+  .migrated-content :global(#contact) {
+    scroll-margin-top: 150px;
   }
 
   .migrated-content :global(img) {
