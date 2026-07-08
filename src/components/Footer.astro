@@ -1,0 +1,55 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="copyright">&copy; {year} LE-Network</p>
+    <a href="mailto:roelofs.hd@le-network.nl">roelofs.hd@le-network.nl</a>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: 0;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+    background: #f6f6f3;
+  }
+
+  .footer-inner {
+    width: min(1120px, calc(100% - 40px));
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    padding: 24px 0;
+    color: #4b5563;
+  }
+
+  .copyright {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+
+  .site-footer a {
+    color: #374151;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .site-footer a:hover,
+  .site-footer a:focus-visible {
+    color: #1d81c3;
+  }
+
+  @media (max-width: 720px) {
+    .footer-inner {
+      width: min(100% - 28px, 1120px);
+      align-items: flex-start;
+      flex-direction: column;
+      padding: 24px 0;
+    }
+  }
+</style>

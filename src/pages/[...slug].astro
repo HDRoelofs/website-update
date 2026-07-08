@@ -1,0 +1,625 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import pages from "../data/pages.json";
+
+type Page = {
+  route: string;
+  title: string;
+  description: string;
+  content: string;
+};
+
+export function getStaticPaths() {
+  return (pages as Page[]).map((page) => ({
+    params: { slug: page.route || undefined },
+    props: { page }
+  }));
+}
+
+const { page } = Astro.props as { page: Page };
+type Lang = "nl" | "en" | "de" | "es";
+const currentLang: Lang = page.route.startsWith("de/") || page.route === "de"
+  ? "de"
+  : page.route.startsWith("es/") || page.route === "es"
+    ? "es"
+    : page.route.startsWith("en/") || page.route === "en"
+      ? "en"
+      : "nl";
+const titleOverrides: Record<string, string> = {
+  "": "Samenwerken om leerprocessen te verbeteren",
+  en: "Working together to improve learning processes",
+  de: "Gemeinsam Lernprozesse verbessern",
+  es: "Trabajando juntos para mejorar los procesos de aprendizaje",
+  "over-ons": "Over Ons",
+  "en/over-ons": "About Us",
+  "de/over-ons": "Über Uns",
+  "es/over-ons": "Sobre nosotros",
+  referenties: "Referenties",
+  references: "References",
+  "en/references": "References",
+  "de/references": "Referenzen",
+  "es/references": "Referencias",
+  links: "Links",
+  "en/links": "Links",
+  "de/links": "Links",
+  "es/links": "Enlaces",
+  "foto-gallerijen": "Foto gallerijen",
+  "en/photo-galleries": "Photo galleries",
+  "de/fotogalerien": "Fotogalerien",
+  "es/galerias-de-fotos": "Galerías de fotos"
+};
+const defaultHomeTitle = {
+  nl: "Samenwerken om leerprocessen te verbeteren",
+  en: "Working together to improve learning processes",
+  de: "Gemeinsam Lernprozesse verbessern",
+  es: "Trabajando juntos para mejorar los procesos de aprendizaje"
+}[currentLang];
+const displayTitle = titleOverrides[page.route] ?? (page.title === "LE-Network" ? defaultHomeTitle : page.title);
+const metaDescription = {
+  nl: "LE-Network werkt samen om leerprocessen te verbeteren.",
+  en: "LE-Network works together to improve learning processes.",
+  de: "LE-Network arbeitet gemeinsam daran, Lernprozesse zu verbessern.",
+  es: "LE-Network trabaja en conjunto para mejorar los procesos de aprendizaje."
+}[currentLang];
+const isHome = ["", "en", "de", "es"].includes(page.route);
+const routeClass = `route-${(page.route || "home").replaceAll("/", "-")}`;
+const referenceRoutes = new Set(["referenties", "references", "en/referenties", "en/references", "de/referenties", "de/references", "es/referenties", "es/references"]);
+const teamRoutes = new Set(["over-ons", "en/over-ons", "de/over-ons", "es/over-ons"]);
+const referenceLogoPattern = /((?:<figure><img[^>]+><\/figure>\s*){3,})/s;
+
+function enhanceReferenceLogos(html: string) {
+  return referenceRoutes.has(page.route)
+    ? html.replace(referenceLogoPattern, '<div class="reference-logo-grid">$1</div>')
+    : html;
+}
+
+function enhanceContactBlocks(html: string) {
+  const contactPattern = /(<h3>[^<]*(?:Bel ons|Call us|Rufen|Ll)[^<]*<\/h3>[\s\S]*?)(<h3>[^<]*(?:Mail|correo)[^<]*<\/h3>[\s\S]*?)(<h3>[^<]*(?:Kom langs|Come along|Kommen|Venir)[^<]*<\/h3>[\s\S]*?<p><iframe[\s\S]*?<\/iframe><\/p>)/;
+
+  return html.replace(
+    contactPattern,
+    '<div class="contact-info-grid"><section class="contact-info-card">$1</section><section class="contact-info-card">$2</section><section class="contact-info-card">$3</section></div>'
+  );
+}
+
+function enhanceImageRuns(html: string) {
+  const imageRunPattern = /(<img[^>]+>)\s*<br\/?>\s*(<img[^>]+>)\s*<br\/?>\s*(<img[^>]+>)/g;
+
+  return html.replace(imageRunPattern, '<div class="inline-image-grid">$1$2$3</div>');
+}
+
+function enhanceTeamPage(html: string) {
+  if (!teamRoutes.has(page.route)) {
+    return html;
+  }
+
+  const fallbackHeading = {
+    nl: "Even voorstellen",
+    en: "Let me introduce myself",
+    de: "Darf ich mich vorstellen?",
+    es: "Déjame presentarme"
+  }[currentLang];
+  const heading = html.match(/<h2[^>]*>[\s\S]*?<\/h2>/)?.[0] ?? `<h2>${fallbackHeading}</h2>`;
+  const cards = Array.from(html.matchAll(/<div class="site-block-cover[\s\S]*?<\/div><\/div>/g)).map((match) => {
+    const cover = match[0];
+    const image = cover.match(/<img[^>]+>/)?.[0] ?? "";
+    const link = cover.match(/<a[^>]+>[\s\S]*?<\/a>/)?.[0] ?? "";
+    const src = image.match(/\ssrc="([^"]+)"/)?.[1] ?? "";
+    const srcset = image.match(/\ssrcset="([^"]+)"/)?.[1];
+    const alt = link.replace(/<[^>]+>/g, "").trim();
+    const srcsetAttr = srcset ? ` srcset="${srcset}"` : "";
+
+    return `<figure class="team-card"><img src="${src}"${srcsetAttr} sizes="(max-width: 720px) 100vw, 50vw" alt="${alt}" loading="lazy" decoding="async" /> <figcaption>${link}</figcaption></figure>`;
+  });
+
+  return cards.length
+    ? `${heading}<div class="team-grid">${cards.join("")}</div>`
+    : html;
+}
+
+function removeDuplicateFirstHeading(html: string) {
+  const normalizedTitle = displayTitle.trim().toLowerCase();
+  return html.replace(/^\s*<h([1-3])[^>]*>(.*?)<\/h\1>\s*/i, (match, _level, text) => {
+    const normalizedHeading = text.replace(/<[^>]+>/g, "").trim().toLowerCase();
+    return normalizedHeading === normalizedTitle ? "" : match;
+  });
+}
+
+function localizeMigratedFragments(html: string) {
+  if (currentLang === "nl") {
+    return html;
+  }
+
+  const replacements: Record<Lang, Record<string, string>> = {
+    nl: {},
+    en: {
+      ">Mail ons<": ">Mail us<",
+      ">Analoge LEARN Games<": ">Analog LEARN Games<",
+      ">Digitale LEARN Games<": ">Digital LEARN Games<",
+      ">Fotoarchief<": ">Photo archive<"
+    },
+    de: {
+      ">Mail ons<": ">E-Mail<",
+      ">Analoge LEARN Games<": ">Analoge LEARN Games<",
+      ">Digitale LEARN Games<": ">Digitale LEARN Games<",
+      ">Fotoarchief<": ">Fotoarchiv<"
+    },
+    es: {
+      ">Mail ons<": ">Correo<",
+      ">Analoge LEARN Games<": ">LEARN Games analógicos<",
+      ">Digitale LEARN Games<": ">LEARN Games digitales<",
+      ">Fotoarchief<": ">Archivo fotográfico<"
+    }
+  };
+
+  return Object.entries(replacements[currentLang]).reduce(
+    (result, [from, to]) => result.replaceAll(from, to),
+    html
+  );
+}
+
+const content = enhanceImageRuns(enhanceContactBlocks(enhanceReferenceLogos(enhanceTeamPage(removeDuplicateFirstHeading(localizeMigratedFragments(page.content))))));
+---
+
+<BaseLayout title={`${displayTitle} | LE-Network`} description={metaDescription} lang={currentLang}>
+  {!isHome && (
+    <section class="page-hero">
+      <h1>{displayTitle}</h1>
+    </section>
+  )}
+
+  <article class:list={["migrated-content", routeClass]} set:html={content} />
+</BaseLayout>
+
+<style>
+  .page-hero {
+    width: min(1360px, calc(100% - 56px));
+    margin: 0 auto;
+    padding: 88px 0 38px;
+  }
+
+  .page-hero h1 {
+    max-width: 1100px;
+    margin: 0;
+    color: #0f172a;
+    font-size: clamp(2.4rem, 6.5vw, 5.1rem);
+    font-weight: 720;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+
+  .migrated-content {
+    width: min(1360px, calc(100% - 56px));
+    margin: 0 auto;
+    color: #1f2937;
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+
+  .migrated-content :global(h1),
+  .migrated-content :global(h2),
+  .migrated-content :global(h3) {
+    color: #0f172a;
+    line-height: 1.15;
+    letter-spacing: 0;
+  }
+
+  .migrated-content :global(h2) {
+    margin: 3rem 0 1rem;
+    font-size: clamp(1.8rem, 3vw, 2.7rem);
+    font-weight: 680;
+  }
+
+  .migrated-content :global(h3) {
+    margin: 2.2rem 0 0.8rem;
+    font-size: 1.35rem;
+  }
+
+  .migrated-content :global(p) {
+    max-width: 120ch;
+    margin: 0 0 1.25rem;
+  }
+
+  .migrated-content :global(a) {
+    color: #1d81c3;
+    font-weight: 650;
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.18em;
+  }
+
+  .migrated-content :global(img) {
+    border-radius: 14px;
+  }
+
+  .migrated-content :global(figure) {
+    margin: 2rem 0;
+  }
+
+  .migrated-content :global(.reference-logo-grid) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+    gap: 22px;
+    margin: 2rem 0 4rem;
+  }
+
+  .migrated-content :global(.reference-logo-grid figure) {
+    display: grid;
+    min-height: 168px;
+    place-items: center;
+    margin: 0;
+    padding: 28px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+  }
+
+  .migrated-content :global(.reference-logo-grid img) {
+    width: auto;
+    max-width: 100%;
+    max-height: 94px;
+    border-radius: 0;
+    object-fit: contain;
+  }
+
+  .migrated-content :global(.contact-info-grid) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr);
+    gap: 22px;
+    margin: 3rem 0;
+  }
+
+  .migrated-content :global(.contact-info-card) {
+    min-width: 0;
+    padding: 26px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+  }
+
+  .migrated-content :global(.contact-info-card h3) {
+    margin-top: 0;
+  }
+
+  .migrated-content :global(.contact-info-card p) {
+    max-width: none;
+  }
+
+  .migrated-content :global(.contact-info-card iframe) {
+    width: 100%;
+    min-height: 280px;
+    border-radius: 14px;
+    box-shadow: none;
+  }
+
+  .migrated-content :global(.contact-info-card:nth-child(3)) {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.8fr) minmax(260px, 1.2fr);
+    gap: 22px;
+    align-items: start;
+  }
+
+  .migrated-content :global(.contact-info-card:nth-child(3) h3) {
+    grid-column: 1 / -1;
+  }
+
+  .migrated-content :global(.contact-info-card:nth-child(3) p:has(iframe)) {
+    grid-column: 2;
+    grid-row: 2 / span 5;
+    margin: 0;
+  }
+
+  .migrated-content :global(.team-grid) {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    margin: 2rem 0 4rem;
+  }
+
+  .migrated-content :global(.team-card) {
+    overflow: hidden;
+    margin: 0;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+  }
+
+  .migrated-content :global(.team-card img) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    height: auto;
+    border-radius: 0;
+    object-fit: cover;
+  }
+
+  .migrated-content :global(.team-card figcaption) {
+    padding: 18px 20px 20px;
+  }
+
+  .migrated-content :global(.team-card figcaption a) {
+    color: #0f172a;
+    font-size: 1.15rem;
+    font-weight: 760;
+    text-decoration: none;
+  }
+
+  .migrated-content :global(.team-card figcaption a:hover),
+  .migrated-content :global(.team-card figcaption a:focus-visible) {
+    color: #1d81c3;
+  }
+
+  .migrated-content :global(.inline-image-grid) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+    gap: 22px;
+    margin: 2rem 0;
+  }
+
+  .migrated-content :global(.inline-image-grid img) {
+    width: 100%;
+    height: 220px;
+    padding: 18px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 18px;
+    background: #fff;
+    object-fit: contain;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+  }
+
+  .migrated-content :global(section[data-element_type="section"]) {
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr);
+    grid-template-areas:
+      "avatar quote"
+      "avatar name"
+      "avatar role";
+    gap: 4px 28px;
+    align-items: start;
+    max-width: 1120px;
+    margin: 2rem 0;
+    padding: 24px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+  }
+
+  .migrated-content :global(section[data-element_type="section"] > svg) {
+    display: none;
+  }
+
+  .migrated-content :global(section[data-element_type="section"] blockquote) {
+    grid-area: quote;
+    margin: 0 0 8px;
+    padding: 0;
+  }
+
+  .migrated-content :global(section[data-element_type="section"] blockquote p) {
+    max-width: none;
+    margin: 0;
+    color: #1f2937;
+    font-size: 1.02rem;
+    line-height: 1.7;
+  }
+
+  .migrated-content :global(section[data-element_type="section"] p:has(img)) {
+    grid-area: avatar;
+    margin: 0;
+  }
+
+  .migrated-content :global(section[data-element_type="section"] p:has(img) img) {
+    width: 112px;
+    height: 112px;
+    border-radius: 999px;
+    object-fit: cover;
+  }
+
+  .migrated-content :global(section[data-element_type="section"] h4) {
+    grid-area: name;
+    margin: 0;
+  }
+
+  .migrated-content :global(section[data-element_type="section"] h4) {
+    color: #0f172a;
+    font-size: 1rem;
+    font-weight: 760;
+  }
+
+  .migrated-content :global(section[data-element_type="section"] h5) {
+    grid-area: role;
+    margin: 0;
+    padding: 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+    font-weight: 650;
+  }
+
+  .migrated-content :global(section[data-element_type="section"] h5 a) {
+    color: #6b7280;
+  }
+
+  .migrated-content :global(section[data-element_type="section"] h4 br),
+  .migrated-content :global(section[data-element_type="section"] h5 br) {
+    display: none;
+  }
+
+  .migrated-content :global(section[data-element_type="section"] > p:last-child) {
+    display: none;
+  }
+
+  @media (max-width: 940px) {
+    .migrated-content :global(.contact-info-grid) {
+      grid-template-columns: 1fr;
+    }
+
+    .migrated-content :global(.contact-info-card:nth-child(3)) {
+      display: block;
+    }
+
+    .migrated-content :global(.contact-info-card:nth-child(3) p:has(iframe)) {
+      margin-top: 18px;
+    }
+
+    .migrated-content :global(.team-grid) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .migrated-content :global(section[data-element_type="section"]) {
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "avatar"
+        "quote"
+        "name"
+        "role";
+    }
+  }
+
+  @media (max-width: 620px) {
+    .migrated-content :global(.team-grid) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .migrated-content :global(iframe) {
+    width: min(100%, 1120px);
+    aspect-ratio: 16 / 9;
+    height: auto;
+    border: 0;
+    border-radius: 18px;
+    box-shadow: 0 22px 60px rgba(15, 23, 42, 0.12);
+  }
+
+  .migrated-content :global(.wp-block-columns),
+  .migrated-content :global(.site-block-columns) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+    gap: 28px;
+    margin: 2rem 0;
+  }
+
+  .migrated-content :global(.wp-block-column),
+  .migrated-content :global(.site-block-column) {
+    min-width: 0;
+  }
+
+  .migrated-content :global(.wp-block-column:empty),
+  .migrated-content :global(.site-block-column:empty) {
+    display: none;
+  }
+
+  .migrated-content :global(.site-block-cover),
+  .migrated-content :global(.wp-block-cover) {
+    position: relative;
+    display: flex;
+    min-height: clamp(420px, 42vw, 680px);
+    align-items: flex-end;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #d9dee2;
+  }
+
+  .migrated-content :global(.site-block-cover__image-background),
+  .migrated-content :global(.wp-block-cover__image-background) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+  }
+
+  .migrated-content :global(.site-block-cover__background),
+  .migrated-content :global(.wp-block-cover__background) {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 40%, rgba(15, 23, 42, 0.42));
+  }
+
+  .migrated-content :global(.site-block-cover__inner-container),
+  .migrated-content :global(.wp-block-cover__inner-container) {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    padding: 32px;
+    text-align: center;
+  }
+
+  .migrated-content :global(.site-block-cover__inner-container p),
+  .migrated-content :global(.wp-block-cover__inner-container p) {
+    max-width: none;
+    margin: 0;
+  }
+
+  .migrated-content :global(.site-block-cover__inner-container a),
+  .migrated-content :global(.wp-block-cover__inner-container a) {
+    color: #fff;
+    font-size: clamp(1.5rem, 3vw, 2.4rem);
+    font-weight: 760;
+    text-decoration: none;
+  }
+
+  .migrated-content :global(.gallery),
+  .migrated-content :global(.wp-block-gallery),
+  .migrated-content :global(.site-block-gallery) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+  }
+
+  .migrated-content :global(.leerpretpark-eu-banner) {
+    margin: 4rem 0;
+    border-radius: 28px;
+    background: #f2f0e8;
+  }
+
+  .migrated-content :global(.leerpretpark-eu-banner__inner) {
+    max-width: none;
+  }
+
+  .migrated-content :global(form) {
+    display: grid;
+    gap: 14px;
+    max-width: 680px;
+    padding: 28px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 24px;
+    background: #fff;
+    box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+  }
+
+  .migrated-content :global(input),
+  .migrated-content :global(textarea) {
+    width: 100%;
+    border: 1px solid rgba(15, 23, 42, 0.14);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font: inherit;
+  }
+
+  .migrated-content :global(button),
+  .migrated-content :global(input[type="submit"]) {
+    width: fit-content;
+    border: 0;
+    border-radius: 999px;
+    padding: 12px 18px;
+    background: #1d81c3;
+    color: #fff;
+    font-weight: 750;
+    cursor: pointer;
+  }
+
+  @media (max-width: 720px) {
+    .page-hero,
+    .migrated-content {
+      width: min(100% - 28px, 1360px);
+    }
+
+    .page-hero {
+      padding-top: 64px;
+    }
+  }
+</style>

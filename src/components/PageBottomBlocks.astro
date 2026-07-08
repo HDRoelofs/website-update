@@ -1,0 +1,198 @@
+---
+const path = Astro.url.pathname;
+const currentLang = path.startsWith("/de/") || path === "/de"
+  ? "de"
+  : path.startsWith("/es/") || path === "/es"
+    ? "es"
+    : path.startsWith("/en/") || path === "/en"
+      ? "en"
+      : "nl";
+
+const snnText = {
+  nl: {
+    title: "Europese samenwerking",
+    copy: "Het ontwikkelen van een nieuwe methode voor het meten van leerplezier is mede mogelijk gemaakt door financiering van SNN (Samenwerkingsverband Noord Nederland) en de Europese Unie.",
+    gallery: "Foto gallerijen",
+    logosLabel: "SNN en Europese Unie",
+    euAlt: "Europese Unie",
+    archiveLabel: "Fotoarchief",
+    archiveHref: "/foto-gallerijen/"
+  },
+  en: {
+    title: "European cooperation",
+    copy: "The development of a new method for measuring learning enjoyment was made possible in part by funding from SNN (Northern Netherlands Alliance) and the European Union.",
+    gallery: "Photo galleries",
+    logosLabel: "SNN and the European Union",
+    euAlt: "European Union",
+    archiveLabel: "Photo archive",
+    archiveHref: "/en/photo-galleries/"
+  },
+  de: {
+    title: "Europaeische Zusammenarbeit",
+    copy: "Die Entwicklung einer neuen Methode zur Messung der Lernfreude wurde durch die Finanzierung von SNN (Northern Netherlands Alliance) und der Europaeischen Union mit ermoeglicht.",
+    gallery: "Fotogalerien",
+    logosLabel: "SNN und die Europaeische Union",
+    euAlt: "Europaeische Union",
+    archiveLabel: "Fotoarchiv",
+    archiveHref: "/de/fotogalerien/"
+  },
+  es: {
+    title: "Cooperacion europea",
+    copy: "El desarrollo de un nuevo metodo para medir el disfrute del aprendizaje fue posible en parte gracias a la financiacion de SNN (Alianza del Norte de los Paises Bajos) y la Union Europea.",
+    gallery: "Galerias de fotos",
+    logosLabel: "SNN y la Union Europea",
+    euAlt: "Union Europea",
+    archiveLabel: "Archivo fotografico",
+    archiveHref: "/es/galerias-de-fotos/"
+  }
+}[currentLang];
+
+const galleryLinks = [
+  { label: "Facebook", href: "https://www.facebook.com/lenetworkemmen/" },
+  { label: "Flickr", href: "https://www.flickr.com/photos/124144338@N06/" },
+  { label: snnText.archiveLabel, href: snnText.archiveHref }
+];
+---
+
+<section class="snn-block" aria-labelledby="snn-title">
+  <div class="snn-inner">
+    <div class="snn-logos" aria-label={snnText.logosLabel}>
+      <img src="/assets/uploads/leerpretpark/snn.jpg" alt="SNN" loading="lazy" />
+      <img src="/assets/uploads/leerpretpark/europe.png" alt={snnText.euAlt} loading="lazy" />
+    </div>
+    <div class="snn-copy">
+      <p class="snn-eyebrow" id="snn-title">{snnText.title}</p>
+      <p>{snnText.copy}</p>
+    </div>
+  </div>
+</section>
+
+<section class="gallery-strip" aria-labelledby="gallery-title">
+  <div class="gallery-inner">
+    <h2 id="gallery-title">{snnText.gallery}</h2>
+    <nav aria-label={snnText.gallery}>
+      {galleryLinks.map((link) => (
+        <a href={link.href} target={link.href.startsWith("http") ? "_blank" : undefined} rel={link.href.startsWith("http") ? "noopener" : undefined}>
+          {link.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</section>
+
+<style>
+  .snn-block {
+    margin-top: 96px;
+    background: #f3f0ea;
+  }
+
+  .snn-inner {
+    width: min(1120px, calc(100% - 40px));
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 46px;
+    align-items: center;
+    padding: 42px 0 48px;
+  }
+
+  .snn-logos {
+    display: flex;
+    align-items: center;
+    gap: 34px;
+  }
+
+  .snn-logos img {
+    display: block;
+    width: auto;
+    height: 82px;
+    object-fit: contain;
+    background: #fff;
+  }
+
+  .snn-copy {
+    color: #566b73;
+  }
+
+  .snn-copy p {
+    max-width: 860px;
+    margin: 0;
+    font-size: clamp(1.06rem, 1.8vw, 1.28rem);
+    line-height: 1.45;
+  }
+
+  .snn-eyebrow {
+    margin-bottom: 14px !important;
+    color: #9aa4a9;
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem) !important;
+    font-weight: 780;
+    letter-spacing: 0.28em;
+    line-height: 1.2 !important;
+    text-transform: uppercase;
+  }
+
+  .gallery-strip {
+    background: #1d81c3;
+    color: #fff;
+  }
+
+  .gallery-inner {
+    width: min(1360px, calc(100% - 56px));
+    margin: 0 auto;
+    padding: 52px 0 62px;
+  }
+
+  .gallery-inner h2 {
+    margin: 0 0 28px;
+    color: #fff;
+    font-size: clamp(1.5rem, 2vw, 2rem);
+    font-weight: 780;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .gallery-inner nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 28px;
+  }
+
+  .gallery-inner a {
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 640;
+    text-decoration: none;
+  }
+
+  .gallery-inner a:hover,
+  .gallery-inner a:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  @media (max-width: 760px) {
+    .snn-inner {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      padding: 34px 0 38px;
+    }
+
+    .snn-logos {
+      gap: 18px;
+    }
+
+    .snn-logos img {
+      height: 64px;
+    }
+
+    .gallery-inner {
+      width: min(100% - 28px, 1360px);
+      padding: 42px 0 50px;
+    }
+
+    .gallery-inner nav {
+      flex-direction: column;
+      gap: 14px;
+    }
+  }
+</style>

@@ -1,0 +1,615 @@
+---
+import pages from "../data/pages.json";
+
+const path = Astro.url.pathname;
+const currentLang = path.startsWith("/de/") || path === "/de"
+  ? "de"
+  : path.startsWith("/es/") || path === "/es"
+    ? "es"
+    : path.startsWith("/en/") || path === "/en"
+      ? "en"
+      : "nl";
+
+const text = {
+  nl: {
+    tagline: "Samenwerken om leerprocessen te verbeteren",
+    nav: [
+      { label: "Home", href: "/" },
+      { label: "Over Ons", href: "/over-ons/" },
+      { label: "Referenties", href: "/referenties/" },
+      { label: "Links", href: "/links/" }
+    ],
+    search: "Zoeken",
+    contact: "Contact",
+    navLabel: "Hoofdnavigatie",
+    languageLabel: "Taalkeuze",
+    menuOpen: "Menu openen"
+  },
+  en: {
+    tagline: "Working together to improve learning processes",
+    nav: [
+      { label: "Home", href: "/en/" },
+      { label: "About Us", href: "/en/over-ons/" },
+      { label: "References", href: "/en/references/" },
+      { label: "Links", href: "/en/links/" }
+    ],
+    search: "Search",
+    contact: "Contact",
+    navLabel: "Main navigation",
+    languageLabel: "Language selection",
+    menuOpen: "Open menu"
+  },
+  de: {
+    tagline: "Gemeinsam Lernprozesse verbessern",
+    nav: [
+      { label: "Home", href: "/de/" },
+      { label: "Über Uns", href: "/de/over-ons/" },
+      { label: "Referenzen", href: "/de/references/" },
+      { label: "Links", href: "/de/links/" }
+    ],
+    search: "Suchen",
+    contact: "Kontakt",
+    navLabel: "Hauptnavigation",
+    languageLabel: "Sprachauswahl",
+    menuOpen: "Menü öffnen"
+  },
+  es: {
+    tagline: "Trabajando juntos para mejorar los procesos de aprendizaje",
+    nav: [
+      { label: "Inicio", href: "/es/" },
+      { label: "Sobre Nosotros", href: "/es/over-ons/" },
+      { label: "Referencias", href: "/es/references/" },
+      { label: "Enlaces", href: "/es/links/" }
+    ],
+    search: "Buscar",
+    contact: "Contacto",
+    navLabel: "Navegación principal",
+    languageLabel: "Selección de idioma",
+    menuOpen: "Abrir menú"
+  }
+}[currentLang];
+
+type Lang = "nl" | "en" | "de" | "es";
+
+const pageRoutes = new Set((pages as { route: string }[]).map((page) => page.route));
+const translatedRoutes: Record<string, Record<Lang, string>> = {
+  home: { nl: "", en: "en", de: "de", es: "es" },
+  about: { nl: "over-ons", en: "en/over-ons", de: "de/over-ons", es: "es/over-ons" },
+  references: { nl: "referenties", en: "en/references", de: "de/references", es: "es/references" },
+  links: { nl: "links", en: "en/links", de: "de/links", es: "es/links" },
+  galleries: {
+    nl: "foto-gallerijen",
+    en: "en/photo-galleries",
+    de: "de/fotogalerien",
+    es: "es/galerias-de-fotos"
+  }
+};
+
+const normalizedRoute = path.replace(/^\/+|\/+$/g, "");
+const baseRoute = normalizedRoute.replace(/^(en|de|es)\//, "").replace(/^(en|de|es)$/, "");
+const routeGroup = Object.values(translatedRoutes).find((routes) =>
+  Object.values(routes).includes(normalizedRoute)
+);
+
+function localizedHref(lang: Lang) {
+  const translatedRoute = routeGroup?.[lang];
+  if (translatedRoute !== undefined) {
+    return `/${translatedRoute}${translatedRoute ? "/" : ""}`;
+  }
+
+  const candidate = lang === "nl" ? baseRoute : `${lang}/${baseRoute}`;
+  const fallback = lang === "nl" ? "" : lang;
+  const route = pageRoutes.has(candidate) ? candidate : fallback;
+
+  return `/${route}${route ? "/" : ""}`;
+}
+
+const languages = [
+  {
+    label: "Nederlands",
+    shortLabel: "NL",
+    href: localizedHref("nl"),
+    lang: "nl",
+    flag: "/assets/plugins/sitepress-multilingual-cms/res/flags/nl.png"
+  },
+  {
+    label: "English",
+    shortLabel: "EN",
+    href: localizedHref("en"),
+    lang: "en",
+    flag: "/assets/plugins/sitepress-multilingual-cms/res/flags/en.png"
+  },
+  {
+    label: "Deutsch",
+    shortLabel: "DE",
+    href: localizedHref("de"),
+    lang: "de",
+    flag: "/assets/plugins/sitepress-multilingual-cms/res/flags/de.png"
+  },
+  {
+    label: "Español",
+    shortLabel: "ES",
+    href: localizedHref("es"),
+    lang: "es",
+    flag: "/assets/plugins/sitepress-multilingual-cms/res/flags/es.png"
+  }
+];
+
+const socialItems = [
+  { label: "Facebook", href: "https://www.facebook.com/lenetworkemmen/", icon: "facebook" },
+  { label: "Twitter", href: "https://twitter.com/LENetworkNL", icon: "twitter" },
+  { label: "YouTube", href: "https://www.youtube.com/channel/UC9o7JhQt2UExnjmQ71xyVfw", icon: "youtube" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/henk-roelofs/?locale=nl", icon: "linkedin" },
+  { label: "Instagram", href: "https://www.instagram.com/lenetwork", icon: "instagram" }
+];
+---
+
+<header class="site-header">
+  <div class="top-bar">
+    <div class="top-bar-inner">
+      <a class="phone-link" href="tel:06-50514062">TEL: 06-50514062</a>
+      <div class="social-links" aria-label="Social media">
+        {socialItems.map((item) => (
+          <a class={`social-link social-${item.icon}`} href={item.href} aria-label={item.label} title={item.label} rel="nofollow noopener" target="_blank"></a>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="LE-Network home">
+      <img class="brand-logo" src="/assets/uploads/2019/10/LEnetwork.png" alt="LE-Network" />
+      <span class="brand-text">
+        <span>{text.tagline}</span>
+      </span>
+    </a>
+
+    <input class="nav-toggle" id="nav-toggle" type="checkbox" aria-label={text.menuOpen} />
+    <label class="menu-button" for="nav-toggle" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+    </label>
+
+    <nav class="main-nav" aria-label={text.navLabel}>
+      <ul>
+        {text.nav.map((item) => (
+          <li><a href={item.href}>{item.label}</a></li>
+        ))}
+      </ul>
+
+      <div class="language-switcher" aria-label={text.languageLabel}>
+        {languages.map((item) => (
+          <a href={item.href} hreflang={item.lang} lang={item.lang} aria-label={item.label} title={item.label}>
+            <img src={item.flag} alt="" width="18" height="12" loading="lazy" />
+            <span>{item.shortLabel}</span>
+          </a>
+        ))}
+      </div>
+
+      <div class="header-actions">
+        <details class="search-action">
+          <summary aria-label={text.search} title={text.search}>
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="m16.5 16.5 4.5 4.5"></path>
+            </svg>
+          </summary>
+          <form action="https://www.google.com/search" method="get" target="_blank">
+            <input type="hidden" name="as_sitesearch" value="le-network.nl" />
+            <input name="q" type="search" placeholder={text.search} aria-label={text.search} />
+          </form>
+        </details>
+
+        <a class="contact-button" href="mailto:roelofs.hd@le-network.nl">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M21 11.5a8.4 8.4 0 0 1-9 8.3 9.6 9.6 0 0 1-4.2-.9L3 20l1.3-4.1a8.2 8.2 0 0 1-.8-3.6A8.5 8.5 0 0 1 12 4a8.6 8.6 0 0 1 9 7.5Z"></path>
+          </svg>
+          <span>{text.contact}</span>
+        </a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<style>
+  @font-face {
+    font-family: "FontAwesome";
+    src: url("/assets/lib/page-builder/assets/lib/font-awesome/fonts/fontawesome-webfont.woff2") format("woff2");
+    font-weight: normal;
+    font-style: normal;
+    font-display: block;
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    background: rgba(250, 250, 248, 0.86);
+    backdrop-filter: blur(18px);
+  }
+
+  .top-bar {
+    background: #91bc06;
+  }
+
+  .top-bar-inner {
+    width: min(1360px, calc(100% - 56px));
+    min-height: 40px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .phone-link {
+    color: #fff;
+    font-size: 0.94rem;
+    font-weight: 750;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+  }
+
+  .social-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .social-link {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 4px;
+    color: #fff;
+    font-family: "FontAwesome";
+    font-size: 1rem;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  .social-facebook { background: #3b5998; }
+  .social-twitter { background: #1da1f2; }
+  .social-youtube { background: #e21b1b; }
+  .social-linkedin { background: #0077b5; }
+  .social-instagram { background: #1f2937; }
+
+  .social-facebook::before { content: "\f082"; }
+  .social-twitter::before { content: "\f081"; }
+  .social-youtube::before { content: "\f16a"; }
+  .social-linkedin::before { content: "\f0e1"; }
+  .social-instagram::before { content: "\f16d"; }
+
+  .header-inner {
+    width: min(1360px, calc(100% - 56px));
+    min-height: 82px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(16px, 2vw, 32px);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+    flex: 1 1 360px;
+    color: #111827;
+    text-decoration: none;
+  }
+
+  .brand-logo {
+    width: 150px;
+    flex: 0 0 auto;
+    max-width: 34vw;
+    height: auto;
+  }
+
+  .brand-text {
+    min-width: 0;
+  }
+
+  .brand-text span {
+    display: block;
+    max-width: 260px;
+    color: #6b7280;
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  .main-nav {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: clamp(8px, 1.25vw, 18px);
+    min-width: 0;
+    flex: 0 1 auto;
+  }
+
+  .main-nav ul {
+    display: flex;
+    align-items: center;
+    gap: clamp(2px, 0.45vw, 6px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .main-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 38px;
+    padding: 0 clamp(8px, 0.85vw, 12px);
+    border-radius: 999px;
+    color: #374151;
+    font-size: clamp(0.86rem, 0.92vw, 0.94rem);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 160ms ease, color 160ms ease;
+  }
+
+  .main-nav a:hover,
+  .main-nav a:focus-visible {
+    background: #eef6fb;
+    color: #0f6ea8;
+  }
+
+  .language-switcher {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 2px;
+    padding: 4px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 999px;
+    background: white;
+  }
+
+  .language-switcher a {
+    gap: 10px;
+    min-height: 30px;
+    padding: 0 clamp(6px, 0.6vw, 9px);
+    color: #6b7280;
+    font-size: clamp(0.72rem, 0.76vw, 0.78rem);
+  }
+
+  .language-switcher img {
+    width: 18px;
+    height: 12px;
+    border-radius: 2px;
+    object-fit: cover;
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.1);
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: clamp(8px, 0.9vw, 12px);
+  }
+
+  .search-action {
+    position: relative;
+  }
+
+  .search-action summary {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    color: #1d81c3;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .search-action summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .search-action summary:hover,
+  .search-action summary:focus-visible {
+    background: #eef6fb;
+  }
+
+  .search-action svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.2;
+  }
+
+  .search-action form {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: min(280px, calc(100vw - 32px));
+    padding: 10px;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.14);
+  }
+
+  .search-action input[type="search"] {
+    width: 100%;
+    border: 1px solid rgba(15, 23, 42, 0.14);
+    border-radius: 12px;
+    padding: 11px 12px;
+    font: inherit;
+  }
+
+  .contact-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 0 clamp(11px, 0.9vw, 15px);
+    border-radius: 4px;
+    background: #1d81c3;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 1180px) {
+    .brand {
+      flex-basis: 300px;
+    }
+
+    .brand-logo {
+      width: 132px;
+    }
+
+    .brand-text span {
+      max-width: 220px;
+      font-size: 0.78rem;
+    }
+
+    .contact-button {
+      min-width: 36px;
+      justify-content: center;
+    }
+
+    .contact-button span {
+      display: none;
+    }
+  }
+
+  .contact-button:hover,
+  .contact-button:focus-visible {
+    background: #91bc06;
+    color: #fff;
+  }
+
+  .contact-button svg {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    fill: #fff;
+  }
+
+  .nav-toggle,
+  .menu-button {
+    display: none;
+  }
+
+  @media (max-width: 920px) {
+    .header-inner,
+    .top-bar-inner {
+      width: min(100% - 28px, 1360px);
+    }
+
+    .header-inner {
+      min-height: 74px;
+    }
+
+    .brand-text span {
+      display: none;
+    }
+
+    .menu-button {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      place-content: center;
+      gap: 5px;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      border-radius: 999px;
+      background: white;
+      cursor: pointer;
+    }
+
+    .menu-button span {
+      width: 18px;
+      height: 2px;
+      border-radius: 999px;
+      background: #111827;
+    }
+
+    .main-nav {
+      position: fixed;
+      top: 114px;
+      right: 14px;
+      left: 14px;
+      display: grid;
+      gap: 18px;
+      padding: 18px;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-8px);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .main-nav ul {
+      display: grid;
+      gap: 4px;
+    }
+
+    .main-nav a {
+      width: 100%;
+      justify-content: space-between;
+      min-height: 44px;
+    }
+
+    .language-switcher {
+      justify-content: space-between;
+      border-radius: 18px;
+    }
+
+    .language-switcher a {
+      width: auto;
+      justify-content: center;
+      min-width: 62px;
+    }
+
+    .header-actions {
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .search-action form {
+      right: auto;
+      left: 0;
+    }
+
+    .nav-toggle:checked ~ .main-nav {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .top-bar-inner {
+      min-height: 48px;
+    }
+
+    .social-links {
+      gap: 5px;
+    }
+
+    .social-link {
+      width: 28px;
+      height: 28px;
+      font-size: 0.9rem;
+    }
+  }
+</style>
