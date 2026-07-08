@@ -54,7 +54,15 @@ const defaultHomeTitle = {
   de: "Gemeinsam Lernprozesse verbessern",
   es: "Trabajando juntos para mejorar los procesos de aprendizaje"
 }[currentLang];
-const displayTitle = titleOverrides[page.route] ?? (page.title === "LE-Network" ? defaultHomeTitle : page.title);
+function cleanImportedTitle(title: string) {
+  return title
+    .replaceAll("LE-Netzwerk", "LE-Network")
+    .replaceAll("Red LE", "LE-Network")
+    .replace(/\s+[–-]\s+LE-Network$/i, "");
+}
+
+const importedTitle = cleanImportedTitle(page.title);
+const displayTitle = titleOverrides[page.route] ?? (importedTitle === "LE-Network" ? defaultHomeTitle : importedTitle);
 const metaDescription = {
   nl: "LE-Network werkt samen om leerprocessen te verbeteren.",
   en: "LE-Network works together to improve learning processes.",
@@ -139,12 +147,14 @@ function localizeMigratedFragments(html: string) {
       ">Fotoarchief<": ">Photo archive<"
     },
     de: {
+      "LE-Netzwerk": "LE-Network",
       ">Mail ons<": ">E-Mail<",
       ">Analoge LEARN Games<": ">Analoge LEARN Games<",
       ">Digitale LEARN Games<": ">Digitale LEARN Games<",
       ">Fotoarchief<": ">Fotoarchiv<"
     },
     es: {
+      "Red LE": "LE-Network",
       ">Mail ons<": ">Correo<",
       ">Analoge LEARN Games<": ">LEARN Games analógicos<",
       ">Digitale LEARN Games<": ">LEARN Games digitales<",
