@@ -112,6 +112,12 @@ function enhanceTeamPage(html: string) {
     return html;
   }
 
+  const teamRoles = {
+    nl: { owner: "Mede-eigenaar", volunteer: "Vrijwilliger" },
+    en: { owner: "Co-owner", volunteer: "Volunteer" },
+    de: { owner: "Miteigentumer", volunteer: "Freiwilliger" },
+    es: { owner: "Copropietario", volunteer: "Voluntario" }
+  }[currentLang];
   const fallbackHeading = {
     nl: "Even voorstellen",
     en: "Let me introduce myself",
@@ -127,8 +133,10 @@ function enhanceTeamPage(html: string) {
     const srcset = image.match(/\ssrcset="([^"]+)"/)?.[1];
     const alt = link.replace(/<[^>]+>/g, "").trim();
     const srcsetAttr = srcset ? ` srcset="${srcset}"` : "";
+    const importedRole = cover.match(/<p[^>]*class="[^"]*team-role[^"]*"[^>]*>([\s\S]*?)<\/p>/)?.[1]?.replace(/<[^>]+>/g, "").trim();
+    const role = importedRole || (alt === "Henk Roelofs" ? teamRoles.owner : teamRoles.volunteer);
 
-    return `<figure class="team-card"><img src="${src}"${srcsetAttr} sizes="(max-width: 720px) 100vw, 50vw" alt="${alt}" loading="lazy" decoding="async" /> <figcaption>${link}</figcaption></figure>`;
+    return `<figure class="team-card"><img src="${src}"${srcsetAttr} sizes="(max-width: 720px) 100vw, 50vw" alt="${alt}" loading="lazy" decoding="async" /> <figcaption>${link}<span class="team-role">${role}</span></figcaption></figure>`;
   });
 
   return cards.length
@@ -374,6 +382,14 @@ const content = enhanceImageRuns(enhanceContactAnchor(enhanceContactBlocks(enhan
   .migrated-content :global(.team-card figcaption a:hover),
   .migrated-content :global(.team-card figcaption a:focus-visible) {
     color: #1d81c3;
+  }
+
+  .migrated-content :global(.team-card .team-role) {
+    display: block;
+    margin-top: 6px;
+    color: #64748b;
+    font-size: 0.95rem;
+    font-weight: 680;
   }
 
   .migrated-content :global(.inline-image-grid) {
