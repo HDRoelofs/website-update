@@ -14,6 +14,8 @@ const {
   description = "Samenwerken om leerprocessen te verbeteren.",
   lang = "nl"
 } = Astro.props;
+const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
+const isHome = ["/", "/en", "/de", "/es"].includes(path);
 ---
 
 <!doctype html>
@@ -27,8 +29,9 @@ const {
   <body>
     <Header />
     <main>
+      {isHome && <PageBottomBlocks posterOnly />}
       <slot />
-      <PageBottomBlocks />
+      <PageBottomBlocks hidePoster={isHome} />
     </main>
     <Footer />
   </body>

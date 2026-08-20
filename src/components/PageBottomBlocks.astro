@@ -1,4 +1,10 @@
 ---
+interface Props {
+  posterOnly?: boolean;
+  hidePoster?: boolean;
+}
+
+const { posterOnly = false, hidePoster = false } = Astro.props;
 const path = Astro.url.pathname;
 const currentLang = path.startsWith("/de/") || path === "/de"
   ? "de"
@@ -70,7 +76,7 @@ const galleryLinks = [
 ];
 ---
 
-<section class="snn-block" aria-labelledby="snn-title">
+{posterOnly ? (
   <div class="poster-announcement">
     <a class="poster-preview" href="/assets/announcements/leerpret-engine-efro/leerpret-engine-efro-poster.pdf" target="_blank" rel="noopener">
       <img src="/assets/announcements/leerpret-engine-efro/leerpret-engine-efro-poster.svg" alt={snnText.posterAlt} loading="lazy" />
@@ -82,6 +88,9 @@ const galleryLinks = [
       <a class="poster-button" href="/assets/announcements/leerpret-engine-efro/leerpret-engine-efro-poster.pdf" target="_blank" rel="noopener">{snnText.posterLink}</a>
     </div>
   </div>
+) : (
+<>
+<section class="snn-block" aria-labelledby="snn-title">
   <div class="snn-inner">
     <div class="snn-logos" aria-label={snnText.logosLabel}>
       <img src="/assets/uploads/leerpretpark/snn.jpg" alt="SNN" loading="lazy" />
@@ -93,6 +102,20 @@ const galleryLinks = [
     </div>
   </div>
 </section>
+
+{!hidePoster && (
+  <div class="poster-announcement poster-announcement--after-europe">
+    <a class="poster-preview" href="/assets/announcements/leerpret-engine-efro/leerpret-engine-efro-poster.pdf" target="_blank" rel="noopener">
+      <img src="/assets/announcements/leerpret-engine-efro/leerpret-engine-efro-poster.svg" alt={snnText.posterAlt} loading="lazy" />
+    </a>
+    <div class="poster-copy">
+      <p class="snn-eyebrow">EFRO</p>
+      <h2>{snnText.posterTitle}</h2>
+      <p>{snnText.posterCopy}</p>
+      <a class="poster-button" href="/assets/announcements/leerpret-engine-efro/leerpret-engine-efro-poster.pdf" target="_blank" rel="noopener">{snnText.posterLink}</a>
+    </div>
+  </div>
+)}
 
 <section class="gallery-strip" aria-labelledby="gallery-title">
   <div class="gallery-inner">
@@ -106,6 +129,8 @@ const galleryLinks = [
     </nav>
   </div>
 </section>
+</>
+)}
 
 <style>
   .snn-block {
@@ -131,6 +156,11 @@ const galleryLinks = [
     gap: 52px;
     align-items: center;
     padding: 56px 0 18px;
+  }
+
+  .poster-announcement--after-europe {
+    padding-top: 56px;
+    padding-bottom: 56px;
   }
 
   .poster-preview {
